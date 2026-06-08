@@ -1,0 +1,14 @@
+{
+  "name": "Hermes",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"npm run dev -w apps/backend\" \"npm run dev -w apps/frontend\"",
+    "build": "npm run build -w apps/backend && npm run build -w apps/frontend",
+    "seed": "npm run seed -w apps/backend"
+  },
+  "version": "2.0.0",
+  "workspaces": [
+    "apps/backend",
+    "apps/frontend"
+  ]
+}
