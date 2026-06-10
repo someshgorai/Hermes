@@ -224,7 +224,7 @@ All updates are scoped by organization ID to ensure tenant data isolation.
 
 ### 5. Warehouse Inventory Hub
 ![Warehouses](/apps/frontend/public/screenshots/warehouses.png)
-*Displays a list of active warehouses, their current risk exposures, and associated primary import ports.*
+*Displays a list of active warehouses, and associated primary import ports.*
 
 ### 6. Port Infrastructure Hub
 ![Ports](/apps/frontend/public/screenshots/ports.png)
@@ -238,6 +238,23 @@ All updates are scoped by organization ID to ensure tenant data isolation.
 ### 8. Real-time Alerts Panel
 ![Alerts](/apps/frontend/public/screenshots/alerts.png)
 *Monitors and displays high-priority risk warnings broadcasted dynamically via Socket.io when weather or geopolitical events threaten supplier operations.*
+
+---
+
+## Future Aspects & AI/ML Roadmap
+
+Hermes is built to grow into a predictive, AI-driven supply chain assistant. Future phases of development include:
+
+### 1. Machine Learning for Delay Prediction
+- **Time-Series Forecasting:** Train LSTM (Long Short-Term Memory) or Transformer models on historical port congestion, maritime weather conditions, and seasonal shipping trends to predict delay times on specific legs.
+- **Dynamic Transit Cost Estimations:** Integrate regression models to predict ocean freight rate variations based on fuel costs and global route supply/demand conditions.
+
+### 2. NLP Sentiment Analysis on Supplier News
+- **Financial Risk Classification:** Fine-tune custom BERT models on financial news feeds to automatically classify the severity of supplier-related risk events (e.g., classifying a strike threat vs. actual factory closure).
+- **Early-Warning Insolvency Detectors:** Train models to analyze regulatory filings and local publications for signs of supplier distress before major news outlets cover them.
+
+### 3. Multi-Modal Routing Analytics
+- **Rail, Road, and Air Integration:** Extend the route optimization scorer to evaluate rail transit, air cargo rates, and road congestion indices, supporting complete end-to-end multi-modal supply chains.
 
 ---
 
@@ -269,4 +286,34 @@ Create a `.env` file in `apps/frontend/`:
 VITE_API_URL=http://localhost:3001
 VITE_WS_URL=http://localhost:3001
 VITE_CLERK_PUBLISHABLE_KEY=pk_test_xxxx
+```
+
+---
+
+## License
+
+This project is licensed under the MIT License:
+
+```
+MIT License
+
+Copyright (c) 2026 Somesh Gorai
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 ```
