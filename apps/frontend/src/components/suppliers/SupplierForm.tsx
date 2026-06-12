@@ -16,16 +16,22 @@ import { Loader2 } from "lucide-react"
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   aliases: z.string().optional(),
-  tier: z.coerce.number().min(1).max(3),
+  tier: z.enum(["1", "2", "3"]),
   country: z.string().min(2),
   category: z.string().min(2),
   originAddress: z.string().min(5),
-  leadTimeDays: z.coerce.number().min(1),
+  leadTimeDays: z.string().refine((value) => Number(value) >= 1, {
+    message: "Lead time must be at least 1 day",
+  }),
   dependency: z.enum(["low", "medium", "high", "sole_source"]),
-  shippingRatePerKm: z.coerce.number().min(0),
-  exportPortIds: z.array(z.string().uuid()).default([]),
+  shippingRatePerKm: z.string().refine((value) => Number(value) >= 0, {
+    message: "Shipping rate must be 0 or greater",
+  }),
+  exportPortIds: z.array(z.string().uuid()),
   primaryPortId: z.string().uuid().optional().or(z.literal("")),
 })
+
+type SupplierFormValues = z.infer<typeof formSchema>
 
 interface SupplierFormProps {
   open: boolean
@@ -45,18 +51,18 @@ export function SupplierForm({ open, onOpenChange, onSuccess }: SupplierFormProp
     queryFn: async () => (await api.get<Port[]>("/api/ports")).data,
   })
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema) as any,
+  const form = useForm<SupplierFormValues>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
       aliases: "",
-      tier: 1,
+      tier: "1",
       country: "",
       category: "",
       originAddress: "",
-      leadTimeDays: 14,
+      leadTimeDays: "14",
       dependency: "medium",
-      shippingRatePerKm: 1.5,
+      shippingRatePerKm: "1.5",
       exportPortIds: [],
       primaryPortId: "",
     },
@@ -65,13 +71,16 @@ export function SupplierForm({ open, onOpenChange, onSuccess }: SupplierFormProp
   const selectedPortIds = form.watch("exportPortIds") || []
   const primaryPortId = form.watch("primaryPortId")
 
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+  const onSubmit = async (values: SupplierFormValues) => {
     setIsPending(true)
     try {
       // Simulate backend call
       const payload = {
         ...values,
+        tier: Number(values.tier),
         category: values.category.trim(),
+        leadTimeDays: Number(values.leadTimeDays),
+        shippingRatePerKm: Number(values.shippingRatePerKm),
         aliases: values.aliases ? values.aliases.split(",").map(s => s.trim()) : [],
         primaryPortId: values.exportPortIds.length > 0 ? (values.primaryPortId || values.exportPortIds[0]) : undefined
       }
@@ -95,7 +104,7 @@ export function SupplierForm({ open, onOpenChange, onSuccess }: SupplierFormProp
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit) as any} className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
@@ -132,7 +141,7 @@ export function SupplierForm({ open, onOpenChange, onSuccess }: SupplierFormProp
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Tier</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={String(field.value)}>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select tier" />

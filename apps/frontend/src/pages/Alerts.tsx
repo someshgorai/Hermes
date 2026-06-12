@@ -10,9 +10,16 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Bell, CheckCircle2 } from "lucide-react"
 import { toast } from "sonner"
 
+const alertFilters = ["all", "active", "dismissed"] as const
+type AlertFilter = (typeof alertFilters)[number]
+
+function isAlertFilter(value: string): value is AlertFilter {
+  return alertFilters.includes(value as AlertFilter)
+}
+
 export default function AlertsPage() {
   const api = useApiClient()
-  const [filter, setFilter] = useState<"all" | "active" | "dismissed">("active")
+  const [filter, setFilter] = useState<AlertFilter>("active")
 
   const { data: alerts, isLoading, refetch } = useQuery({
     queryKey: ["alerts", filter],
@@ -55,7 +62,11 @@ export default function AlertsPage() {
         }
       />
 
-      <Tabs value={filter} onValueChange={(v) => setFilter(v as any)} className="w-full">
+      <Tabs value={filter} onValueChange={(value) => {
+        if (isAlertFilter(value)) {
+          setFilter(value)
+        }
+      }} className="w-full">
         <TabsList className="mb-6">
           <TabsTrigger value="all">All Alerts</TabsTrigger>
           <TabsTrigger value="active">Active</TabsTrigger>

@@ -1,6 +1,6 @@
 import { logger } from "../lib/logger";
 import { Worker } from "bullmq";
-import { connection } from "../queues/queue";
+import { queueConnection } from "../queues/queue";
 import { db } from "../database/drizzle";
 import {
   suppliers,
@@ -371,7 +371,7 @@ export const analysisWorker = new Worker<AnalysisJobData>(
     );
   },
   {
-    connection: connection as any,
+    connection: queueConnection,
     concurrency: 5,
     prefix: "hermes",
   },

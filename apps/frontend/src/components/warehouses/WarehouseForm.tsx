@@ -20,6 +20,8 @@ const formSchema = z.object({
   importPortId: z.string().uuid().optional().or(z.literal("none")),
 })
 
+type WarehouseFormValues = z.infer<typeof formSchema>
+
 interface WarehouseFormProps {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -39,8 +41,8 @@ export function WarehouseForm({ open, onOpenChange, onSuccess }: WarehouseFormPr
     queryFn: async () => (await api.get<Port[]>("/api/ports")).data,
   })
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema) as any,
+  const form = useForm<WarehouseFormValues>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
       address: "",
@@ -49,7 +51,7 @@ export function WarehouseForm({ open, onOpenChange, onSuccess }: WarehouseFormPr
     },
   })
 
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+  const onSubmit = async (values: WarehouseFormValues) => {
     setIsPending(true)
     try {
       const payload = {
@@ -81,7 +83,7 @@ export function WarehouseForm({ open, onOpenChange, onSuccess }: WarehouseFormPr
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit) as any} className="space-y-4 pt-2">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pt-2">
             <FormField
               control={form.control}
               name="name"

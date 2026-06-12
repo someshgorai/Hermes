@@ -16,6 +16,8 @@ const formSchema = z.object({
   address: z.string().min(5, "Address must be at least 5 characters"),
 })
 
+type PortFormValues = z.infer<typeof formSchema>
+
 interface PortFormProps {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -30,8 +32,8 @@ export function PortForm({ open, onOpenChange, onSuccess }: PortFormProps) {
   const [isPending, setIsPending] = useState(false)
   const api = useApiClient()
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema) as any,
+  const form = useForm<PortFormValues>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
       country: "",
@@ -39,7 +41,7 @@ export function PortForm({ open, onOpenChange, onSuccess }: PortFormProps) {
     },
   })
 
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+  const onSubmit = async (values: PortFormValues) => {
     setIsPending(true)
     try {
       await api.post("/api/ports", values)
@@ -65,7 +67,7 @@ export function PortForm({ open, onOpenChange, onSuccess }: PortFormProps) {
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit) as any} className="space-y-4 pt-2">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pt-2">
             <FormField
               control={form.control}
               name="name"

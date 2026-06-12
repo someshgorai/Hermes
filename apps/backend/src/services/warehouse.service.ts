@@ -165,7 +165,7 @@ export async function updateWarehouse(
 
 /** Deletes a warehouse after verifying it's not referenced by active recommendations. */
 export async function deleteWarehouse(id: string, organizationId: string) {
-  // Check if this warehouse is referenced by any recommendations
+  // Check if this warehouse is referenced by recommendations
   const refs = await db
     .select({ count: sql<number>`count(*)::int` })
     .from(recommendations)

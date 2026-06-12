@@ -7,6 +7,15 @@ interface RiskEventChartProps {
   events: RiskEvent[]
 }
 
+interface RiskEventBarData extends RiskEvent {
+  shortHeadline: string
+}
+
+interface RiskEventBarClickData {
+  source?: string
+  payload?: RiskEventBarData
+}
+
 const TYPE_COLORS = {
   financial: "#ef4444", // red
   geopolitical: "#a855f7", // purple
@@ -24,7 +33,7 @@ export function RiskEventChart({ events }: RiskEventChartProps) {
   }
 
   // chop headlines so the x-axis doesn't get crazy
-  const data = events.map(e => ({
+  const data: RiskEventBarData[] = events.map(e => ({
     ...e,
     shortHeadline: e.headline.length > 20 ? e.headline.substring(0, 20) + "..." : e.headline
   }))
@@ -84,8 +93,8 @@ export function RiskEventChart({ events }: RiskEventChartProps) {
             <Bar 
               dataKey="severity" 
               radius={[4, 4, 0, 0]}
-              onClick={(data: any) => {
-                const source = data?.source || data?.payload?.source;
+              onClick={(data: RiskEventBarClickData) => {
+                const source = data.source ?? data.payload?.source;
                 if (source) {
                   window.open(source, "_blank", "noopener,noreferrer");
                 }
