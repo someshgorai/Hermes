@@ -4,7 +4,7 @@ import { logger } from "../lib/logger";
 
 let io: SocketServer | null = null;
 
-// Initializes the Socket.io server on the HTTP server.
+// spins up the socket.io server on top of the http server
 export function initSocket(httpServer: HttpServer): void {
   if (io) {
     return;
@@ -42,7 +42,7 @@ export function initSocket(httpServer: HttpServer): void {
   });
 }
 
-/** Returns the Socket.io server instance, or null if not yet initialized. */
+// returns the socket.io server instance (null if not set up yet)
 export function getIo(): SocketServer | null {
   return io;
 }

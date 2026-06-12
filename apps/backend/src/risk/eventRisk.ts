@@ -2,11 +2,7 @@ import axios from "axios";
 import { readFileSync } from "fs";
 import { logger } from "../lib/logger";
 
-/**
- * Supply-chain risk categories supported by the event scoring model.
- *
- * These values must remain aligned with the OpenRouter prompt output.
- */
+// supply-chain risk categories — must stay in sync with the OpenRouter prompt output
 export type RiskType =
   | "financial"
   | "labor"
@@ -14,9 +10,7 @@ export type RiskType =
   | "logistics"
   | "esg";
 
-/**
- * A validated risk event extracted from external news sources.
- */
+// a validated risk event pulled from external news
 export interface RiskEvent {
   risk_type: RiskType;
   severity: number;
@@ -25,23 +19,14 @@ export interface RiskEvent {
   headline: string;
 }
 
-/**
- * Event risk scoring result.
- *
- * Score is normalized to a 0–100 scale.
- */
+// event risk result — score is 0–100
 export interface EventRiskResult {
   score: number;
   events: RiskEvent[];
 }
 
-/**
- * Relative contribution of each risk category to the final event score.
- *
- * Financial and geopolitical events receive higher weights because
- * they typically affect supplier continuity more broadly than
- * localized logistics or ESG incidents.
- */
+// category weights for the final event score
+// financial & geopolitical get more weight since they hit supplier continuity harder
 const EVENT_WEIGHTS: Record<RiskType, number> = {
   financial: 0.3,
   geopolitical: 0.25,
@@ -58,33 +43,22 @@ const VALID_RISK_TYPES = new Set<RiskType>([
   "esg",
 ]);
 
-/**
- * Cached at startup to avoid repeated filesystem reads during analysis.
- */
+// cached at startup so we don't re-read the file every time
 const PROMPT_TEMPLATE = readFileSync(
   new URL("./prompts/riskAnalysis.txt", import.meta.url),
   "utf-8",
 );
 
-/**
- * Builds the supplier-specific prompt sent to OpenRouter.
- */
+// builds the supplier-specific prompt for OpenRouter
 function buildPrompt(supplierName: string, supplierCountry: string): string {
   const currentDate = new Date().toISOString().split("T")[0];
 
-  return PROMPT_TEMPLATE.replace("{{supplier_name}}", supplierName)
-    .replace("{{supplier_country}}", supplierCountry)
-    .replace("{{current_date}}", currentDate);
+  return PROMPT_TEMPLATE.replaceAll("{{supplier_name}}", supplierName)
+    .replaceAll("{{supplier_country}}", supplierCountry)
+    .replaceAll("{{current_date}}", currentDate);
 }
 
-/**
- * Validates and normalizes LLM output before it enters the scoring pipeline.
- *
- * Ensures:
- * - Known risk categories only
- * - Severity constrained to 0–1
- * - String fields always populated
- */
+// cleans up LLM output — filters to known categories, clamps severity to 0–1, fills empty strings
 function normalizeRiskEvents(input: unknown): RiskEvent[] {
   if (!Array.isArray(input)) {
     return [];
@@ -115,10 +89,7 @@ function normalizeRiskEvents(input: unknown): RiskEvent[] {
     }));
 }
 
-/**
- * Queries OpenRouter for recent supplier-related events and converts
- * the response into validated RiskEvent objects.
- */
+// hits OpenRouter for recent supplier events and returns validated RiskEvent[]
 async function fetchRiskEvents(
   supplierName: string,
   supplierCountry: string,
@@ -189,12 +160,7 @@ async function fetchRiskEvents(
   }
 }
 
-/**
- * Converts categorized risk events into a single normalized score.
- *
- * Multiple events of the same type do not stack.
- * The highest severity event for each category is used.
- */
+// turns risk events into one score — only the worst event per category counts
 function computeEventScore(events: RiskEvent[]): number {
   if (events.length === 0) {
     return 0;

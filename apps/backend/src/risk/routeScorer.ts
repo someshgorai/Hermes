@@ -11,9 +11,7 @@ import type { EventRiskResult } from "./eventRisk";
 import { scoreCurrentWeather, type WeatherRiskResult } from "./weatherRisk";
 import { logger } from "../lib/logger";
 
-/**
- * A scored supplier route.
- */
+// a scored supplier route
 export interface ScoredRoute {
   exportPortId: string;
   exportPortName: string;
@@ -45,9 +43,7 @@ export interface ScoredRoute {
   operationalScore: number;
 }
 
-/**
- * Supplier information required for route scoring.
- */
+// supplier info needed for route scoring
 export interface SupplierRouteInput {
   id: string;
   organizationId: string;
@@ -79,9 +75,7 @@ export async function scoreAllRoutes(
   eventResult: EventRiskResult,
   targetWarehouseId?: string,
 ): Promise<ScoredRoute[]> {
-  /**
-   * Load supplier export ports.
-   */
+  // load supplier export ports
   const exportPortRows = await db
     .select({
       portId: supplierExportPorts.portId,
@@ -99,9 +93,7 @@ export async function scoreAllRoutes(
     return [];
   }
 
-  /**
-   * Load warehouses.
-   */
+  // load warehouses
   const warehouseRows = targetWarehouseId
     ? await db
         .select()
@@ -126,9 +118,7 @@ export async function scoreAllRoutes(
     return [];
   }
 
-  /**
-   * Load only ports required by this calculation.
-   */
+  // only grab the ports we actually need
   const requiredPortIds = [
     ...new Set([
       ...exportPortRows.map((row) => row.portId),
@@ -145,10 +135,7 @@ export async function scoreAllRoutes(
 
   const portMap = new Map(relevantPorts.map((port) => [port.id, port]));
 
-  /**
-   * Cache weather results to avoid
-   * repeated API calls.
-   */
+  // cache weather results so we don't spam the API
   const weatherCache = new Map<string, WeatherRiskResult>();
 
   const scored: ScoredRoute[] = [];
@@ -171,9 +158,7 @@ export async function scoreAllRoutes(
         continue;
       }
 
-      /**
-       * Calculate operational risk.
-       */
+      // calculate operational risk
       const operational: OperationalRiskResult = scoreOperationalRisk({
         originLat: supplier.originLat,
         originLng: supplier.originLng,
@@ -194,9 +179,7 @@ export async function scoreAllRoutes(
         shippingRatePerKm: supplier.shippingRatePerKm,
       });
 
-      /**
-       * Route-specific weather.
-       */
+      // route-specific weather
       const weatherKey = `${exportPort.id}:${warehouse.id}`;
 
       let weatherResult = weatherCache.get(weatherKey);
@@ -221,9 +204,7 @@ export async function scoreAllRoutes(
 
       const weatherScore = weatherResult.score;
 
-      /**
-       * Combine all risk dimensions.
-       */
+      // combine all risk dimensions
       const { score, level } = combinedScore(
         eventResult.score,
         operational.score,
@@ -266,10 +247,7 @@ export async function scoreAllRoutes(
     }
   }
 
-  /**
-   * Sort by:
-   * risk → delivery time → cost
-   */
+  // sort by risk → delivery time → cost
   scored.sort((a, b) => {
     if (a.totalScore !== b.totalScore) {
       return a.totalScore - b.totalScore;

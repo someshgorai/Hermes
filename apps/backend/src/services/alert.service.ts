@@ -3,7 +3,7 @@ import { alerts } from "../database/schema";
 import { eq, and, desc } from "drizzle-orm";
 import type { RiskType } from "../risk/eventRisk";
 
-/** Creates a supplier alert when significant risk is detected. */
+// creates an alert when we detect significant risk for a supplier
 export async function createAlert(data: {
   organizationId: string;
   supplierId: string;
@@ -32,10 +32,7 @@ export async function getAlertsByOrg(organizationId: string) {
     .orderBy(desc(alerts.createdAt));
 }
 
-/**
- * Returns the complete alert history,
- * including dismissed alerts.
- */
+// grabs the full alert history, including dismissed ones
 export async function getAllAlertsByOrg(organizationId: string) {
   return db
     .select()
@@ -44,10 +41,7 @@ export async function getAllAlertsByOrg(organizationId: string) {
     .orderBy(desc(alerts.createdAt));
 }
 
-/**
- * Marks an alert as dismissed without deleting it.
- * Historical alerts remain available for auditing.
- */
+// soft-dismiss — keeps the alert around for audit history
 export async function dismissAlert(id: string, organizationId: string) {
   const [alert] = await db
     .update(alerts)
@@ -61,7 +55,7 @@ export async function dismissAlert(id: string, organizationId: string) {
   return alert;
 }
 
-/** Dismisses all active alerts for an organization. */
+// bulk-dismiss every active alert for the org
 export async function dismissAllAlerts(organizationId: string) {
   await db
     .update(alerts)

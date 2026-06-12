@@ -4,7 +4,7 @@ import { eq, and, or, sql } from "drizzle-orm";
 import axios from "axios";
 import { logger } from "../lib/logger";
 
-// Geocodes a warehouse address using OpenCage.
+// hits OpenCage to geocode a warehouse address
 async function geocodeAddress(
   address: string,
 ): Promise<{ lat: number; lng: number } | null> {
@@ -50,7 +50,7 @@ async function geocodeAddress(
   }
 }
 
-// Creates a warehouse and stores geocoded coordinates.
+// creates a warehouse and geocodes its address for coordinates
 export async function createWarehouse(
   organizationId: string,
   data: {
@@ -85,7 +85,7 @@ export async function createWarehouse(
   return warehouse;
 }
 
-// Warehouses are scoped to a single organization.
+// all warehouses are org-scoped
 export async function getWarehousesByOrg(organizationId: string) {
   return db
     .select()
@@ -104,7 +104,7 @@ export async function getWarehouseById(id: string, organizationId: string) {
   return rows[0] ?? null;
 }
 
-// Updates warehouse details and refreshes coordinates when the address changes.
+// updates warehouse info — re-geocodes if the address changed
 export async function updateWarehouse(
   id: string,
   organizationId: string,

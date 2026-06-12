@@ -23,7 +23,7 @@ export function RiskEventChart({ events }: RiskEventChartProps) {
     return <EmptyState icon={AlertTriangle} title="No recent events" description="No risk events detected for this supplier." />
   }
 
-  // truncate headlines for X axis
+  // chop headlines so the x-axis doesn't get crazy
   const data = events.map(e => ({
     ...e,
     shortHeadline: e.headline.length > 20 ? e.headline.substring(0, 20) + "..." : e.headline

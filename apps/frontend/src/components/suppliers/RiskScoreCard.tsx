@@ -40,8 +40,7 @@ export function RiskScoreCard({ supplier }: RiskScoreCardProps) {
 }
 
 function ScoreBar({ label, score }: { label: string; score: number }) {
-  // Assuming scores are 0-100 where higher is worse risk (or better, context dependent. Let's assume higher = higher risk)
-  // Wait, if "low risk" is good, then score might be 0-100 where higher is higher risk.
+  // scores are 0-100, higher = riskier
   return (
     <div>
       <div className="flex justify-between text-sm mb-1">

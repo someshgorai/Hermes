@@ -9,7 +9,7 @@ export function AppLayout() {
     <div className="flex h-screen overflow-hidden bg-green-50">
       <Sidebar />
       <main className="flex-1 overflow-y-auto overflow-x-hidden flex flex-col">
-        {/* We can place the AlertBanner here later so it spans the top of the main area */}
+        {/* TODO: drop AlertBanner here to span the top of main */}
         <div className="flex-1 p-6 w-full mx-auto max-w-7xl">
           <Outlet />
         </div>

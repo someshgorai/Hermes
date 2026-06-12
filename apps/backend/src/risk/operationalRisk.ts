@@ -2,12 +2,7 @@ import { logger } from "../lib/logger";
 
 export type DependencyLevel = "low" | "medium" | "high" | "sole_source";
 
-/**
- * Relative supplier dependency impact.
- *
- * Sole-source suppliers receive the highest severity because
- * no alternative sourcing path exists if disruption occurs.
- */
+// dependency severity — sole-source is worst since there's no backup
 const DEPENDENCY_SEVERITY: Record<DependencyLevel, number> = {
   low: 0.1,
   medium: 0.4,
@@ -15,32 +10,17 @@ const DEPENDENCY_SEVERITY: Record<DependencyLevel, number> = {
   sole_source: 1.0,
 };
 
-/**
- * Maps total delivery time to a normalized severity score.
- *
- * Uses supplier lead time + transportation time because
- * customers experience the combined delivery duration.
- */
+// maps total delivery time (lead + transit) to a severity score
 const DELIVERY_TIME_SEVERITY = (days: number): number => {
   return days <= 7 ? 0.1 : days <= 14 ? 0.3 : days <= 30 ? 0.6 : 0.9;
 };
 
-/**
- * Maps route distance to a normalized severity score.
- *
- * Longer routes generally increase transportation cost,
- * disruption exposure, and logistics complexity.
- */
+// maps route distance to severity — longer routes = more risk
 const DISTANCE_SEVERITY = (km: number): number => {
   return km < 500 ? 0.1 : km < 2000 ? 0.3 : km < 5000 ? 0.6 : 0.9;
 };
 
-/**
- * Validates latitude and longitude before route calculations.
- *
- * Invalid coordinates usually indicate geocoding failures
- * or corrupted supplier/location data.
- */
+// sanity-checks lat/lng before route calcs (catches geocoding failures)
 function validateCoordinates(lat: number, lng: number, field: string): void {
   if (
     Number.isNaN(lat) ||
@@ -58,12 +38,7 @@ function validateCoordinates(lat: number, lng: number, field: string): void {
   }
 }
 
-/**
- * Calculates the shortest distance between two points on Earth.
- *
- * Uses the Haversine formula and assumes a spherical Earth model.
- * Accuracy is sufficient for logistics route estimation.
- */
+// haversine distance between two points — good enough for logistics estimates
 export function haversineKm(
   lat1: number,
   lng1: number,
@@ -84,12 +59,7 @@ export function haversineKm(
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-/**
- * Input required to estimate operational supply-chain risk.
- *
- * Represents a complete route:
- * Supplier → Export Port → Import Port → Warehouse
- */
+// input for operational risk — full route: supplier → export port → import port → warehouse
 export interface OperationalRiskInput {
   originLat: number;
   originLng: number;
@@ -225,17 +195,8 @@ export function scoreOperationalRisk(
   };
 }
 
-/**
- * Combines independent risk dimensions into a single score.
- *
- * Event risk receives the highest weight because real-world
- * disruptions typically have the greatest immediate impact
- * on supplier continuity.
- *
- * Returns:
- * - score: 0–100
- * - level: qualitative risk classification
- */
+// blends event, operational, and weather risk into one score (0–100)
+// event risk gets the biggest weight since real disruptions hit hardest
 export function combinedScore(
   eventScore: number,
   operationalScore: number,

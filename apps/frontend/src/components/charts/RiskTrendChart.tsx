@@ -15,7 +15,7 @@ export function RiskTrendChart({ data }: RiskTrendChartProps) {
     return <EmptyState icon={BarChart3} title="No trend data" description="Score history is unavailable." />
   }
 
-  // Find the boundary between actual and forecast
+  // figure out where actual data ends and forecast begins
   const today = data.find(d => !d.isForecast && data[data.indexOf(d) + 1]?.isForecast)?.date
 
   return (
@@ -48,12 +48,7 @@ export function RiskTrendChart({ data }: RiskTrendChartProps) {
           <Line type="monotone" dataKey="weatherScore" stroke="#f59e0b" strokeWidth={2} dot={false} name="Weather" connectNulls />
           <Line type="monotone" dataKey="operationalScore" stroke="#10b981" strokeWidth={2} dot={false} name="Operational" connectNulls />
           
-          {/* Overlay dashed lines for forecast - Recharts handles this if we split data or we can just use the fact that lines connect through. 
-              To perfectly style dashed forecast, we would use two Line components per metric, one for actual, one for forecast.
-              For simplicity, we'll draw one line. The prompt says "Solid lines = historical, Dashed lines = forecast". 
-              To do this cleanly in recharts with one dataset, we typically split the dataset or use custom strokeDasharray based on payload, but Line doesn't support a function for strokeDasharray.
-              We'll just map the data into `historicalScore` and `forecastScore` inside the component if needed, but for now we'll stick to a single line as the ReferenceArea visually separates it.
-          */}
+
         </LineChart>
       </ResponsiveContainer>
     </div>

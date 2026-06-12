@@ -9,7 +9,7 @@ import {
 
 const router = Router();
 
-// Returns active alerts for the organization.
+// get active alerts for the org
 router.get("/", requireAuth, async (req, res, next) => {
   try {
     const orgId = getOrgId(req);
@@ -36,7 +36,7 @@ router.get("/", requireAuth, async (req, res, next) => {
   }
 });
 
-// Dismisses a single alert.
+// dismiss a single alert by id
 router.patch<{ id: string }>("/:id/dismiss", requireAuth, async (req, res, next) => {
   try {
     const orgId = getOrgId(req);

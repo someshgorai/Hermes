@@ -38,7 +38,7 @@ export function AlertBanner() {
   return (
     <div className="space-y-3 mb-6">
       {displayAlerts.map(alert => {
-        // Find a matching color for the risk type if possible, or fallback to orange
+        // pick a color based on risk type, default to medium/orange
         const riskColorObj = RISK_COLORS[alert.riskType === 'financial' ? 'critical' : alert.riskType === 'geopolitical' ? 'high' : 'medium'] || RISK_COLORS.medium
 
         return (

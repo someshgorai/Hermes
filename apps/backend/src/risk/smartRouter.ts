@@ -1,10 +1,7 @@
 import type { ScoredRoute } from "./routeScorer";
 import { logger } from "../lib/logger";
 
-/**
- * Ranked routing alternative for an export port,
- * import port, or warehouse.
- */
+// a ranked routing option for an export port, import port, or warehouse
 export interface RankedOption {
   id: string;
   name: string;
@@ -15,10 +12,7 @@ export interface RankedOption {
   reason: string;
 }
 
-/**
- * Route optimization recommendation generated
- * from all evaluated supplier routes.
- */
+// route optimization recommendation from all evaluated supplier routes
 export interface SmartRecommendation {
   currentExportPortId: string | null;
   currentImportPortId: string | null;
@@ -41,16 +35,10 @@ export interface SmartRecommendation {
   warehouseRank: RankedOption[];
 }
 
-/**
- * Minimum score improvement required before
- * recommending a route change.
- */
+// don't bother recommending a change unless it improves the score by at least this much
 const MIN_IMPROVEMENT_POINTS = 10;
 
-/**
- * Generates a human-readable explanation for
- * the recommended route.
- */
+// builds a human-readable reason for the recommended route
 function buildReason(best: ScoredRoute, current: ScoredRoute | null): string {
   const parts: string[] = [];
 
@@ -85,9 +73,7 @@ function buildReason(best: ScoredRoute, current: ScoredRoute | null): string {
     : "Best available route based on current risk, weather, and delivery performance.";
 }
 
-/**
- * Returns the best-scoring route for each export port.
- */
+// picks the best-scoring route per export port
 function rankExportPorts(routes: ScoredRoute[]): RankedOption[] {
   const map = new Map<string, ScoredRoute>();
 
@@ -112,9 +98,7 @@ function rankExportPorts(routes: ScoredRoute[]): RankedOption[] {
     }));
 }
 
-/**
- * Returns the best-scoring route for each import port.
- */
+// picks the best-scoring route per import port
 function rankImportPorts(routes: ScoredRoute[]): RankedOption[] {
   const map = new Map<string, ScoredRoute>();
 
@@ -139,9 +123,7 @@ function rankImportPorts(routes: ScoredRoute[]): RankedOption[] {
     }));
 }
 
-/**
- * Returns the best-scoring route for each warehouse.
- */
+// picks the best-scoring route per warehouse
 function rankWarehouses(routes: ScoredRoute[]): RankedOption[] {
   const map = new Map<string, ScoredRoute>();
 

@@ -3,7 +3,7 @@ import { recommendations } from "../database/schema";
 import { eq, and, desc } from "drizzle-orm";
 import type { SmartRecommendation } from "../risk/smartRouter";
 
-/** Stores a generated route optimization recommendation. */
+// saves a new route optimization recommendation to the db
 export async function createRecommendation(
   organizationId: string,
   supplierId: string,
@@ -44,7 +44,10 @@ export async function createRecommendation(
   return inserted;
 }
 
-/** Returns active recommendations for an organization (not accepted or dismissed). */
+/**
+ * Returns active recommendations for an organization.
+ * Filters out anything already accepted or dismissed.
+ */
 export async function getRecommendationsByOrg(organizationId: string) {
   return db
     .select()
@@ -59,7 +62,7 @@ export async function getRecommendationsByOrg(organizationId: string) {
     .orderBy(desc(recommendations.createdAt));
 }
 
-// Marks a recommendation as accepted.
+// marks a recommendation as accepted
 export async function acceptRecommendation(id: string, organizationId: string) {
   const [recommendation] = await db
     .update(recommendations)
@@ -78,7 +81,7 @@ export async function acceptRecommendation(id: string, organizationId: string) {
   return recommendation;
 }
 
-// Marks a recommendation as dismissed.
+// marks a recommendation as dismissed
 export async function dismissRecommendation(
   id: string,
   organizationId: string,

@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { LoadingSpinner } from "@/components/shared/LoadingSpinner"
 import { Trash2, Play } from "lucide-react"
 import { useNavigate } from "react-router-dom"
+import { useAnalysisStatus } from "@/hooks/useAnalysisStatus"
 
 interface SupplierDetailProps {
   supplier: Supplier
@@ -20,6 +21,8 @@ interface SupplierDetailProps {
 export function SupplierDetail({ supplier, onDelete }: SupplierDetailProps) {
   const api = useApiClient()
   const navigate = useNavigate()
+  const { isAnalyzing } = useAnalysisStatus()
+  const supplierAnalyzing = isAnalyzing(supplier.id)
 
   const { data: history, isLoading: historyLoading } = useQuery({
     queryKey: ["history", supplier.id],
@@ -72,13 +75,21 @@ export function SupplierDetail({ supplier, onDelete }: SupplierDetailProps) {
         </div>
         <div className="xl:col-span-2 bg-background rounded-md border border-border p-4">
           <h3 className="text-sm font-medium mb-4">Risk Trend & Forecast</h3>
-          {historyLoading ? <LoadingSpinner /> : <RiskTrendChart data={history || []} />}
+          {supplierAnalyzing ? (
+            <div className="flex items-center justify-center h-[200px]">
+              <LoadingSpinner text="Running risk analysis…" />
+            </div>
+          ) : historyLoading ? <LoadingSpinner /> : <RiskTrendChart data={history || []} />}
         </div>
       </div>
 
       <div className="bg-background rounded-md border border-border p-4">
         <h3 className="text-sm font-medium mb-4">Recent Risk Events</h3>
-        {eventsLoading ? <LoadingSpinner /> : <RiskEventChart events={events || []} />}
+        {supplierAnalyzing ? (
+          <div className="flex items-center justify-center h-[200px]">
+            <LoadingSpinner text="Scanning risk events…" />
+          </div>
+        ) : eventsLoading ? <LoadingSpinner /> : <RiskEventChart events={events || []} />}
       </div>
     </div>
   )

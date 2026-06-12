@@ -8,8 +8,9 @@ import {
   routeScores,
   riskEvents,
   supplierExportPorts,
+  supplierScoreHistory,
 } from "../database/schema";
-import { eq, and } from "drizzle-orm";
+import { eq, and, lt } from "drizzle-orm";
 import { scoreEventRisk } from "../risk/eventRisk";
 import { scoreCurrentWeather, scoreWeatherForecast } from "../risk/weatherRisk";
 import { scoreAllRoutes } from "../risk/routeScorer";
@@ -92,6 +93,36 @@ export const analysisWorker = new Worker<AnalysisJobData>(
     }
 
     const supplier = supplierRows[0];
+
+    // ── Step 1b: Purge stale data from previous runs ─────────────────────────
+    // Delete old score history and risk events (before today) so the dashboard
+    // accumulates a historical record while keeping each day's data fresh.
+    const todayStr = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+    const startOfToday = new Date(todayStr);
+
+    await Promise.all([
+      db
+        .delete(supplierScoreHistory)
+        .where(
+          and(
+            eq(supplierScoreHistory.supplierId, supplierId),
+            lt(supplierScoreHistory.date, todayStr),
+          ),
+        ),
+      db
+        .delete(riskEvents)
+        .where(
+          and(
+            eq(riskEvents.supplierId, supplierId),
+            lt(riskEvents.createdAt, startOfToday),
+          ),
+        ),
+    ]);
+
+    logger.info({ supplierId }, "Purged stale score history and risk events");
+
+    // Notify frontend that analysis is in progress so it can show loading states.
+    emitToOrg(organizationId, "analysis:started", { supplierId });
 
     // ── Resolve primary export port coordinates ───────────────────────────────
     const primaryPortId = await getPrimaryExportPortId(supplierId);

@@ -8,6 +8,8 @@ import {
   Recommendation,
 } from "@/types";
 import { AlertBanner } from "@/components/alerts/AlertBanner";
+import { useAnalysisStatus } from "@/hooks/useAnalysisStatus";
+import { useAnalysis } from "@/hooks/useAnalysis";
 import { RiskTrendChart } from "@/components/charts/RiskTrendChart";
 import { RiskEventChart } from "@/components/charts/RiskEventChart";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,7 +21,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
-import { Package, AlertTriangle, AlertOctagon, TrendingUp } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Package, AlertTriangle, AlertOctagon, TrendingUp, Play } from "lucide-react";
 import { RiskBadge } from "@/components/shared/RiskBadge";
 
 export default function DashboardPage() {
@@ -39,6 +42,17 @@ export default function DashboardPage() {
   >();
 
   const currentSupplierId = selectedSupplierId || highestRiskSupplier?.id;
+
+  const { isAnalyzing, markStarted } = useAnalysisStatus();
+  const supplierAnalyzing = isAnalyzing(currentSupplierId);
+
+  const { mutate: runAnalysis, isPending: analysisPending } = useAnalysis();
+
+  const handleRunAnalysis = () => {
+    if (!currentSupplierId) return;
+    markStarted(currentSupplierId);
+    runAnalysis({ supplierId: currentSupplierId });
+  };
 
   const { data: history, isLoading: historyLoading } = useQuery({
     queryKey: ["history", currentSupplierId],
@@ -108,21 +122,33 @@ export default function DashboardPage() {
         <Card className="flex flex-col">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-base">Risk Trend & Forecast</CardTitle>
-            <Select
-              value={currentSupplierId}
-              onValueChange={setSelectedSupplierId}
-            >
-              <SelectTrigger className="w-[180px] h-8 text-xs">
-                <SelectValue placeholder="Select supplier" />
-              </SelectTrigger>
-              <SelectContent>
-                {suppliers?.map((s) => (
-                  <SelectItem key={s.id} value={s.id}>
-                    {s.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="flex items-center gap-2">
+              <Select
+                value={currentSupplierId}
+                onValueChange={setSelectedSupplierId}
+              >
+                <SelectTrigger className="w-[180px] h-8 text-xs">
+                  <SelectValue placeholder="Select supplier" />
+                </SelectTrigger>
+                <SelectContent>
+                  {suppliers?.map((s) => (
+                    <SelectItem key={s.id} value={s.id}>
+                      {s.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 text-xs"
+                disabled={!currentSupplierId || supplierAnalyzing || analysisPending}
+                onClick={handleRunAnalysis}
+              >
+                <Play className="w-3.5 h-3.5 mr-1.5" />
+                Run Analysis
+              </Button>
+            </div>
           </CardHeader>
           <CardContent className="flex-1">
             {suppliersLoading ? (
@@ -130,6 +156,10 @@ export default function DashboardPage() {
             ) : !suppliers || suppliers.length === 0 ? (
               <div className="flex items-center justify-center h-[300px] text-muted-foreground text-sm">
                 No supplier data available. Add suppliers to see risk trends.
+              </div>
+            ) : supplierAnalyzing ? (
+              <div className="flex items-center justify-center h-[300px]">
+                <LoadingSpinner text="Running risk analysis…" />
               </div>
             ) : historyLoading || !history ? (
               <LoadingSpinner />
@@ -149,6 +179,10 @@ export default function DashboardPage() {
             ) : !suppliers || suppliers.length === 0 ? (
               <div className="flex items-center justify-center h-[300px] text-muted-foreground text-sm">
                 No supplier data available. Add suppliers to see risk events.
+              </div>
+            ) : supplierAnalyzing ? (
+              <div className="flex items-center justify-center h-[300px]">
+                <LoadingSpinner text="Scanning risk events…" />
               </div>
             ) : eventsLoading || !events ? (
               <LoadingSpinner />

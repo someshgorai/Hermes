@@ -8,11 +8,7 @@ if (!API_KEY) {
   throw new Error("OPENWEATHERMAP_API_KEY is required");
 }
 
-/**
- * Coordinates representing a complete supply-chain route:
- *
- * Supplier → Export Port → Import Port → Warehouse
- */
+// coordinates for a full route: supplier → export port → import port → warehouse
 export interface RouteCoordinates {
   originLat: number;
   originLng: number;
@@ -24,11 +20,7 @@ export interface RouteCoordinates {
   warehouseLng: number;
 }
 
-/**
- * Weather risk score for a single forecast day.
- *
- * Scores are normalized to a 0–100 scale.
- */
+// weather risk score for a single forecast day (0–100)
 export interface DailyWeatherScore {
   date: string;
 
@@ -38,11 +30,7 @@ export interface DailyWeatherScore {
   condition: string;
 }
 
-/**
- * Current weather risk assessment for a route.
- *
- * The score represents the highest-risk location along the route.
- */
+// weather risk result — score is the worst weather point on the route
 export interface WeatherRiskResult {
   // Score 0–100 — worst weather point on this route
   score: number;
@@ -55,22 +43,12 @@ export interface WeatherRiskResult {
   }[];
 }
 
-/**
- * Five-day weather outlook for a route.
- *
- * OpenWeatherMap's free forecast API provides up to five days
- * of weather data in three-hour intervals.
- */
+// five-day weather outlook (OWM free tier gives 5 days in 3h intervals)
 export interface WeatherForecastResult {
   daily: DailyWeatherScore[];
 }
 
-/**
- * Maps weather conditions to operational disruption severity.
- *
- * Values reflect relative supply-chain impact rather than
- * meteorological intensity.
- */
+// maps weather conditions to supply-chain disruption severity (not meteorological intensity)
 const WEATHER_SEVERITY: Record<string, number> = {
   clear: 0.0,
   clouds: 0.1,
@@ -93,9 +71,7 @@ function mapCondition(main: string): number {
   return WEATHER_SEVERITY[main.toLowerCase()] ?? 0.1;
 }
 
-/**
- * Retrieves current weather conditions for a location.
- */
+// grabs current weather for a single lat/lng
 async function fetchCurrentAt(
   lat: number,
   lng: number,
@@ -197,10 +173,7 @@ export async function scoreCurrentWeather(
   };
 }
 
-/**
- * Converts OpenWeatherMap's 3-hour forecast data into
- * daily worst-case weather conditions.
- */
+// collapses OWM's 3-hour forecast into daily worst-case conditions
 async function fetchForecastAt(
   lat: number,
   lng: number,
@@ -254,10 +227,7 @@ async function fetchForecastAt(
   return byDay;
 }
 
-/**
- * Produces a five-day route forecast using the highest-risk
- * weather condition observed at any route location per day.
- */
+// five-day route forecast — takes the worst weather across all route points each day
 export async function scoreWeatherForecast(
   coords: RouteCoordinates,
 ): Promise<WeatherForecastResult> {

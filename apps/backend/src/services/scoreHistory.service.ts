@@ -43,7 +43,7 @@ export async function upsertScoreHistory(
     });
 }
 
-/** Returns score history used by the supplier risk trend chart. */
+// fetches score history for the risk trend chart
 export async function getScoreHistory(
   supplierId: string,
   organizationId: string,
@@ -64,7 +64,7 @@ export async function getScoreHistory(
     .orderBy(supplierScoreHistory.date);
 }
 
-/** Returns the latest non-forecast risk score. */
+// gets the latest actual (non-forecast) risk score
 export async function getLatestScore(
   supplierId: string,
   organizationId: string,

@@ -4,19 +4,20 @@ import { useApiClient } from "@/api/client"
 import { Supplier, Warehouse } from "@/types"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
-import { Play, Loader2 } from "lucide-react"
+import { Play, Loader2, Eye } from "lucide-react"
 
 interface AnalysisTriggerProps {
   initialSupplierId?: string
   initialWarehouseId?: string
   onRun: (supplierId: string, warehouseId?: string) => void
+  onShow: (supplierId: string, warehouseId?: string) => void
   isPending: boolean
 }
 
 /**
- * Trigger section to select supplier and warehouse, and run analysis.
+ * Trigger section to select supplier and warehouse, and run or view analysis.
  */
-export function AnalysisTrigger({ initialSupplierId, initialWarehouseId, onRun, isPending }: AnalysisTriggerProps) {
+export function AnalysisTrigger({ initialSupplierId, initialWarehouseId, onRun, onShow, isPending }: AnalysisTriggerProps) {
   const api = useApiClient()
   const [supplierId, setSupplierId] = useState<string | undefined>(initialSupplierId)
   const [warehouseId, setWarehouseId] = useState<string | undefined>(initialWarehouseId || "all")
@@ -31,9 +32,17 @@ export function AnalysisTrigger({ initialSupplierId, initialWarehouseId, onRun, 
     queryFn: async () => (await api.get<Warehouse[]>("/api/warehouses")).data,
   })
 
+  const resolvedWarehouseId = warehouseId === "all" ? undefined : warehouseId
+
   const handleRun = () => {
     if (supplierId) {
-      onRun(supplierId, warehouseId === "all" ? undefined : warehouseId)
+      onRun(supplierId, resolvedWarehouseId)
+    }
+  }
+
+  const handleShow = () => {
+    if (supplierId) {
+      onShow(supplierId, resolvedWarehouseId)
     }
   }
 
@@ -68,10 +77,16 @@ export function AnalysisTrigger({ initialSupplierId, initialWarehouseId, onRun, 
         </Select>
       </div>
 
-      <Button onClick={handleRun} disabled={!supplierId || isPending} className="w-full md:w-auto h-10">
-        {isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Play className="w-4 h-4 mr-2" />}
-        Run Analysis
-      </Button>
+      <div className="flex gap-2 w-full md:w-auto">
+        <Button variant="outline" onClick={handleShow} disabled={!supplierId || isPending} className="flex-1 md:flex-none h-10">
+          <Eye className="w-4 h-4 mr-2" />
+          Show Analysis
+        </Button>
+        <Button onClick={handleRun} disabled={!supplierId || isPending} className="flex-1 md:flex-none h-10">
+          {isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Play className="w-4 h-4 mr-2" />}
+          Run Analysis
+        </Button>
+      </div>
     </div>
   )
 }

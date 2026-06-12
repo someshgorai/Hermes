@@ -242,7 +242,7 @@ export function SupplierForm({ open, onOpenChange, onSuccess }: SupplierFormProp
               />
             </div>
 
-            {/* Export Ports Selection (Inspired by Hermes 2.0 multi-select) */}
+            {/* multi-select for export ports */}
             <div className="space-y-2">
               <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/80">
                 Export Ports (Select all that apply)
@@ -259,7 +259,7 @@ export function SupplierForm({ open, onOpenChange, onSuccess }: SupplierFormProp
                           ? [...selectedPortIds, port.id]
                           : selectedPortIds.filter((id) => id !== port.id);
                         form.setValue("exportPortIds", updated);
-                        // If the primary port is no longer in the selected list, reset/update it
+                        // if we just unchecked the primary port, pick a new one
                         if (!updated.includes(primaryPortId || "")) {
                           form.setValue("primaryPortId", updated[0] || "");
                         }

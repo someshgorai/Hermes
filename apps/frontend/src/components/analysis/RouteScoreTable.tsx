@@ -10,7 +10,7 @@ interface RouteScoreTableProps {
  * Table showing all route combinations and their scores.
  */
 export function RouteScoreTable({ routes }: RouteScoreTableProps) {
-  // Sort by total score ascending (assuming lower is better)
+  // sort lowest score first — lower = better route
   const sortedRoutes = [...routes].sort((a, b) => a.totalScore - b.totalScore)
 
   return (

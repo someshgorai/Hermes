@@ -61,7 +61,7 @@ export default function AnalysisPage() {
     refetchInterval: jobRunning ? 3000 : false,
   });
 
-  // Trigger analysis execution
+  // Trigger analysis execution (queues a new BullMQ job)
   const handleRun = (supplierId: string, warehouseId?: string) => {
     setActiveSupplierId(supplierId);
     setActiveWarehouseId(warehouseId);
@@ -69,10 +69,17 @@ export default function AnalysisPage() {
     runAnalysis({ supplierId, warehouseId });
   };
 
-  // Auto-run if supplierId is passed in URL
+  // Show existing analysis results from DB without re-running
+  const handleShow = (supplierId: string, warehouseId?: string) => {
+    setActiveSupplierId(supplierId);
+    setActiveWarehouseId(warehouseId);
+    setJobRunning(false);
+  };
+
+  // Auto-show existing results if supplierId is passed in URL
   useEffect(() => {
     if (initialSupplierId) {
-      handleRun(initialSupplierId, initialWarehouseId);
+      handleShow(initialSupplierId, initialWarehouseId);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -182,6 +189,7 @@ export default function AnalysisPage() {
         initialSupplierId={initialSupplierId}
         initialWarehouseId={initialWarehouseId}
         onRun={handleRun}
+        onShow={handleShow}
         isPending={submitPending || jobRunning}
       />
 
