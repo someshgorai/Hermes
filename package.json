@@ -1,0 +1,20 @@
+{
+  "name": "Hermes",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"npm run dev -w apps/backend\" \"npm run dev -w apps/frontend\"",
+    "build": "npm run build -w apps/backend && npm run build -w apps/frontend",
+    "seed": "npm run seed -w apps/backend"
+  },
+  "version": "3.0.0",
+  "workspaces": [
+    "apps/backend",
+    "apps/frontend"
+  ],
+  "devDependencies": {
+    "prettier": "^3.8.3"
+  },
+  "dependencies": {
+    "@clerk/react": "^6.7.3"
+  }
+}
